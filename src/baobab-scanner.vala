@@ -221,10 +221,55 @@ namespace Baobab {
                                 }
                             }
 
-                            results.size += child_info.get_size ();
-                            if (child_info.has_attribute (FileAttribute.STANDARD_ALLOCATED_SIZE)) {
-                                results.alloc_size += child_info.get_attribute_uint64 (FileAttribute.STANDARD_ALLOCATED_SIZE);
+                            /* Actual Filesize
+                            * 
+                            * results.size += child_info.get_size ();
+                            * if (child_info.has_attribute (FileAttribute.STANDARD_ALLOCATED_SIZE)) {
+                            *     results.alloc_size += child_info.get_attribute_uint64 (FileAttribute.STANDARD_ALLOCATED_SIZE);
+                            * }
+                            */
+
+                            // Size of pages resident in memory
+                            string path = directory.get_path() + "/" + child_info.get_name();
+                            //string[] spawn_args = {"sh", "-c", "\'vmtouch", path, "|", "sed", "\"3!d\"\'"};
+                            string[] spawn_args = {"vmtouch", path};
+                            string[] spawn_env = Environ.get ();
+                            string vmtouch_stdout;
+                            string vmtouch_stderr;
+                            int vmtouch_status;
+
+                            Process.spawn_sync ("/",
+                                spawn_args,
+                                spawn_env,
+                                SpawnFlags.SEARCH_PATH,
+                                null,
+                                out vmtouch_stdout,
+                                out vmtouch_stderr,
+                                out vmtouch_status);
+
+                            // Size with unit symbol
+                            string size_hr = vmtouch_stdout
+                                .split("\n")[2]
+                                .split("  ")[2]
+                                .split("/")[0];
+                            char unit = size_hr.get(size_hr.length - 1);
+                            uint64 size = 0;
+                            // Remove unit symbol
+                            if (unit != 'K' && unit != 'M' && unit != 'G') {
+                                size = size_hr.substring(0, size_hr.length).to_uint64();
+                            } else if (unit == 'K') {
+                                size = size_hr.substring(0, size_hr.length - 1).to_uint64() * 1024;
+                            } else if (unit == 'M') {
+                                size = size_hr.substring(0, size_hr.length - 1).to_uint64() * 1024 * 1024;
+                            } else if (unit == 'G') {
+                                size = size_hr.substring(0, size_hr.length - 1).to_uint64() * 1024 * 1024 * 1024;
                             }
+                            print(path + "\n");
+                            print(size_hr + "\n");
+                            print(size.to_string() + "\n");
+                            results.size += size;
+                            results.alloc_size += size;
+
                             results.elements++;
 
                             var child_time = child_info.get_attribute_uint64 (FileAttribute.TIME_MODIFIED);
