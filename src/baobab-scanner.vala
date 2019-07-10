@@ -264,9 +264,6 @@ namespace Baobab {
                             } else if (unit == 'G') {
                                 size = size_hr.substring(0, size_hr.length - 1).to_uint64() * 1024 * 1024 * 1024;
                             }
-                            print(path + "\n");
-                            print(size_hr + "\n");
-                            print(size.to_string() + "\n");
                             results.size += size;
                             results.alloc_size += size;
 
