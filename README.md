@@ -13,3 +13,12 @@ auto-detects any mounted/unmounted device.
 The code lives at GNOME [GitLab](https://gitlab.gnome.org/GNOME/baobab).
 
 Report issues to the GNOME [issue tracking system](https://gitlab.gnome.org/GNOME/baobab/issues).
+
+## Fork
+
+This version requires `vmtouch` installed (https://hoytech.com/vmtouch/).
+
+Instead of showing disk usage, it shows files that are currently mapped in RAM for faster access.
+The kernel touches files or parts of files automatically, but with `vmtouch -t path` you can manually touch files.
+
+My use for this was preloading entire games (eg. `vmtouch -tf Games/Osu`).
